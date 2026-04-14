@@ -3,6 +3,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import DashboardSidebar from "@/components/DashboardSidebar";
 
 export default function DashboardLayout({
   children,
@@ -18,7 +19,6 @@ export default function DashboardLayout({
     }
   }, [ready, authenticated, router]);
 
-  // Don't flash content while Privy initialises
   if (!ready) {
     return (
       <div className="min-h-screen bg-[#070d1f] flex items-center justify-center">
@@ -33,8 +33,13 @@ export default function DashboardLayout({
   }
 
   if (!authenticated) {
-    return null; // Redirect is in flight
+    return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex min-h-screen bg-surface">
+      <DashboardSidebar />
+      <div className="flex-1 ml-64">{children}</div>
+    </div>
+  );
 }

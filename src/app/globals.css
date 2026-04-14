@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@layer base {
+  button,
+  [role="button"],
+  a {
+    cursor: pointer;
+  }
+}
+
 @theme {
   /* Brand colors */
   --color-surface: #0c1324;
