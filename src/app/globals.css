@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors */
+  --color-surface: #0c1324;
+  --color-on-surface: #dce1fb;
+  --color-primary: #b7ffd2;
+  --color-primary-container: #13f09c;
+  --color-primary-fixed: #51ffae;
+  --color-primary-fixed-dim: #00e292;
+  --color-on-primary: #003921;
+  --color-on-primary-container: #006841;
+  --color-on-primary-fixed: #002111;
+  --color-on-primary-fixed-variant: #005232;
+  --color-inverse-primary: #006d44;
+  --color-secondary: #b9c7e0;
+  --color-secondary-container: #3c4a5e;
+  --color-secondary-fixed: #d5e3fd;
+  --color-secondary-fixed-dim: #b9c7e0;
+  --color-on-secondary: #233144;
+  --color-on-secondary-container: #abb9d2;
+  --color-on-secondary-fixed: #0d1c2f;
+  --color-on-secondary-fixed-variant: #3a485c;
+  --color-tertiary: #ffebe7;
+  --color-tertiary-container: #ffc5bc;
+  --color-tertiary-fixed: #ffdad4;
+  --color-tertiary-fixed-dim: #ffb4a8;
+  --color-on-tertiary: #690100;
+  --color-on-tertiary-container: #b90100;
+  --color-on-tertiary-fixed: #410000;
+  --color-on-tertiary-fixed-variant: #930100;
+  --color-surface-dim: #0c1324;
+  --color-surface-bright: #33394c;
+  --color-surface-variant: #2e3447;
+  --color-surface-container-lowest: #070d1f;
+  --color-surface-container-low: #151b2d;
+  --color-surface-container: #191f31;
+  --color-surface-container-high: #23293c;
+  --color-surface-container-highest: #2e3447;
+  --color-on-surface-variant: #bacbbd;
+  --color-inverse-surface: #dce1fb;
+  --color-inverse-on-surface: #2a3043;
+  --color-surface-tint: #00e292;
+  --color-background: #0c1324;
+  --color-on-background: #dce1fb;
+  --color-outline: #849588;
+  --color-outline-variant: #3b4a40;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+  --color-brand-background: #0c1324;
+  --color-brand-surface: #070d1f;
+  --color-brand-accent: #13f09c;
+  --color-brand-text: #dce1fb;
+
+  /* Font families */
+  --font-headline: "Geist Sans", "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "IBM Plex Mono", monospace;
+  --font-mono: "IBM Plex Mono", monospace;
+  --font-sans: "Inter", sans-serif;
+
+  /* Border radius overrides */
+  --radius: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+}
+
+@layer base {
+  body {
+    background-color: #0c1324;
+    color: #dce1fb;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+}
+
+.liquid-gradient {
+  background: linear-gradient(135deg, #b7ffd2 0%, #13f09c 100%);
+}
+
+.neon-glow {
+  box-shadow: 0 0 20px rgba(19, 240, 156, 0.2);
+}
+
+.gradient-blur {
+  background: radial-gradient(circle at center, rgba(19, 240, 156, 0.15) 0%, transparent 70%);
+  filter: blur(60px);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
