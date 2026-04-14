@@ -12,10 +12,10 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8">
             <a className="text-[#dce1fb] font-medium hover:text-[#13f09c] transition-colors duration-300" href="#">Services</a>
             <a className="text-[#dce1fb] font-medium hover:text-[#13f09c] transition-colors duration-300" href="#">Showcase</a>
-            <Link href="/dashboard" className="text-[#13f09c] font-bold border-b-2 border-[#13f09c] pb-1">Terminal</Link>
+            <Link href="/login" className="text-[#13f09c] font-bold border-b-2 border-[#13f09c] pb-1">Terminal</Link>
             <a className="text-[#dce1fb] font-medium hover:text-[#13f09c] transition-colors duration-300" href="#">About</a>
           </div>
-          <Link href="/dashboard" className="bg-[#13f09c] text-[#0c1324] px-6 py-2.5 rounded-sm font-bold uppercase text-xs tracking-widest hover:scale-95 duration-200 transition-transform">
+          <Link href="/login" className="bg-[#13f09c] text-[#0c1324] px-6 py-2.5 rounded-sm font-bold uppercase text-xs tracking-widest hover:scale-95 duration-200 transition-transform">
             Get Started
           </Link>
         </div>
@@ -37,7 +37,7 @@ export default function LandingPage() {
                 Settle in half a second. Global payroll that feels like a local transfer.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/dashboard" className="bg-[#13f09c] text-[#0c1324] px-8 py-4 rounded-sm font-bold uppercase tracking-widest hover:brightness-110 transition-all">
+                <Link href="/login" className="bg-[#13f09c] text-[#0c1324] px-8 py-4 rounded-sm font-bold uppercase tracking-widest hover:brightness-110 transition-all">
                   Launch Terminal
                 </Link>
                 <button className="border border-[#13f09c]/30 text-white px-8 py-4 rounded-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-all">
@@ -162,7 +162,7 @@ export default function LandingPage() {
             <h2 className="text-5xl md:text-7xl font-black text-white mb-10 tracking-tight leading-none">
               Ready for the future of capital movement?
             </h2>
-            <Link href="/dashboard" className="inline-block bg-[#13f09c] text-[#0c1324] px-12 py-5 rounded-sm font-bold uppercase tracking-[0.2em] hover:scale-105 duration-300 shadow-[0_0_50px_rgba(19,240,156,0.3)]">
+            <Link href="/login" className="inline-block bg-[#13f09c] text-[#0c1324] px-12 py-5 rounded-sm font-bold uppercase tracking-[0.2em] hover:scale-105 duration-300 shadow-[0_0_50px_rgba(19,240,156,0.3)]">
               Contact Sales
             </Link>
           </div>

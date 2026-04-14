@@ -1,9 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
 import NavItem from "@/components/NavItem";
 import StatCard from "@/components/StatCard";
 import SectionHeader from "@/components/SectionHeader";
 
 export default function DashboardPage() {
+  const { user, logout } = usePrivy();
+
+  const displayName =
+    user?.email?.address ??
+    (user?.wallet?.address
+      ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+      : "User");
+
+  const initials = displayName.slice(0, 2).toUpperCase();
+
   return (
     <div className="flex min-h-screen bg-surface">
       {/* Side Navigation */}
@@ -68,11 +81,18 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 ml-2">
               <div className="text-right hidden sm:block">
                 <div className="text-[10px] font-['IBM_Plex_Mono'] text-on-surface-variant uppercase">SYS_ADMIN</div>
-                <div className="text-xs font-bold text-on-surface">Alex Rivera</div>
+                <div className="text-xs font-bold text-on-surface">{displayName}</div>
               </div>
               <div className="w-10 h-10 rounded-full border border-primary-container/20 bg-[#13f09c]/20 flex items-center justify-center text-[#13f09c] font-bold text-sm">
-                AR
+                {initials}
               </div>
+              <button
+                onClick={logout}
+                title="Sign out"
+                className="text-[#dce1fb]/40 hover:text-red-400 transition-colors duration-200 ml-1"
+              >
+                <span className="material-symbols-outlined text-lg">logout</span>
+              </button>
             </div>
           </div>
         </header>

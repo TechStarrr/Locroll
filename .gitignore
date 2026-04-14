@@ -19,6 +19,8 @@
 
 # production
 /build
+TASK.md
+SKILL.md
 
 # misc
 .DS_Store
