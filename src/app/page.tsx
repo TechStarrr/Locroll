@@ -131,7 +131,7 @@ export default function LandingPage() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-mono uppercase text-[#13f09c]">
-                      <span>NEON_NOIR</span>
+                      <span>LOCROLL</span>
                       <span>0.5 Seconds</span>
                     </div>
                     <div className="w-full bg-white/5 h-2">
@@ -172,9 +172,9 @@ export default function LandingPage() {
       <footer className="w-full py-12 px-8 bg-[#070d1f] border-t border-white/5">
         <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 w-full">
           <div className="flex flex-col gap-4">
-            <div className="text-lg font-bold text-[#13f09c] uppercase tracking-tighter">NEON_NOIR</div>
+            <div className="text-lg font-bold text-[#13f09c] uppercase tracking-tighter">LOCROLL</div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-[#dce1fb]/50">
-              © 2024 NEON_NOIR DIGITAL. ALL RIGHTS RESERVED.
+              © 2026 LOCROLL. ALL RIGHTS RESERVED.
             </p>
           </div>
           <div className="flex gap-10">

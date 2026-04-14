@@ -22,8 +22,8 @@ export default function DashboardPage() {
       {/* Side Navigation */}
       <aside className="fixed left-0 top-0 h-full w-64 z-50 bg-[#070d1f] flex flex-col py-8 gap-2 font-['IBM_Plex_Mono'] text-xs uppercase tracking-widest">
         <div className="px-8 mb-10">
-          <Link href="/" className="text-[#13f09c] font-bold text-lg">REMLO_SYS</Link>
-          <div className="text-[#dce1fb]/30 text-[10px] mt-1 tracking-tighter">V2.0.4-LOCKED</div>
+          <Link href="/" className="text-[#13f09c] font-bold text-lg">LOCROLL</Link>
+          <div className="text-[#dce1fb]/30 text-[10px] mt-1 tracking-tighter">V1.0.0-ALPHA</div>
         </div>
         <nav className="flex-1 space-y-1">
           <a className="flex items-center px-8 py-3 bg-[#13f09c]/10 text-[#13f09c] border-r-2 border-[#13f09c] transition-all duration-150 ease-in-out" href="#">
@@ -47,7 +47,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-8">
             <div>
               <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
-                <span>Remlo</span>
+                <span>Locroll</span>
                 <span className="mx-2 text-[#13f09c]/30">/</span>
                 <span className="text-[#13f09c]">Dashboard</span>
               </div>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
 
         <footer className="px-10 py-12 border-t border-outline-variant/5 mt-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-6">
-            <span className="font-['IBM_Plex_Mono'] text-[10px] text-on-surface-variant tracking-widest uppercase">© 2024 REMLO TECHNOLOGIES</span>
+            <span className="font-['IBM_Plex_Mono'] text-[10px] text-on-surface-variant tracking-widest uppercase">© 2026 LOCROLL</span>
             <div className="flex gap-4">
               <a className="text-[10px] font-['IBM_Plex_Mono'] text-on-surface-variant uppercase hover:text-[#13f09c] transition-colors" href="#">Privacy</a>
               <a className="text-[10px] font-['IBM_Plex_Mono'] text-on-surface-variant uppercase hover:text-[#13f09c] transition-colors" href="#">Terms</a>

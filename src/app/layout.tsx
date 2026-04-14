@@ -3,9 +3,9 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "Locroll | Global Payroll Reimagined",
+  title: "LOCROLL | Global Payroll Reimagined",
   description:
-    "A borderless enterprise payroll on Locus. AI agents trigger compliant batch payments, employees receive funds in 0.4s and spend via Visa card.",
+    "LOCROLL — AI-powered global payroll on Locus. Agents trigger compliant batch payments, employees receive funds in 0.4s and spend via Visa card.",
 };
 
 export default function RootLayout({

@@ -25,10 +25,10 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="mb-10 text-center">
           <Link href="/" className="text-2xl font-black uppercase tracking-tighter text-[#13f09c]">
-            REMLO_SYS
+            LOCROLL
           </Link>
           <div className="text-[#dce1fb]/30 text-[10px] font-mono mt-1 tracking-tighter">
-            V2.0.4-LOCKED
+            V1.0.0-ALPHA
           </div>
         </div>
 
