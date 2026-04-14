@@ -43,7 +43,7 @@ export default function AddEmployeePage() {
     firstName: "",
     lastName: "",
     email: "",
-    countryCode: "NG",
+    countryCode: "USD",
     jobTitle: "",
     department: "",
     salaryAmount: "",
@@ -155,7 +155,7 @@ export default function AddEmployeePage() {
                       autoFocus
                       value={form.firstName}
                       onChange={(e) => handleChange("firstName", e.target.value)}
-                      placeholder="Ada"
+                      placeholder="Prudent"
                       className={`w-full bg-surface border rounded-sm px-4 py-3 text-sm text-on-surface font-['IBM_Plex_Mono'] placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-[#13f09c] transition ${
                         errors.firstName ? "border-red-500" : "border-outline-variant/20"
                       }`}
@@ -171,7 +171,7 @@ export default function AddEmployeePage() {
                     <input
                       value={form.lastName}
                       onChange={(e) => handleChange("lastName", e.target.value)}
-                      placeholder="Nwosu"
+                      placeholder="Harry"
                       className={`w-full bg-surface border rounded-sm px-4 py-3 text-sm text-on-surface font-['IBM_Plex_Mono'] placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-[#13f09c] transition ${
                         errors.lastName ? "border-red-500" : "border-outline-variant/20"
                       }`}
@@ -188,7 +188,7 @@ export default function AddEmployeePage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => handleChange("email", e.target.value)}
-                      placeholder="ada@company.com"
+                      placeholder="prudent@company.com"
                       className={`w-full bg-surface border rounded-sm px-4 py-3 text-sm text-on-surface font-['IBM_Plex_Mono'] placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-[#13f09c] transition ${
                         errors.email ? "border-red-500" : "border-outline-variant/20"
                       }`}
@@ -205,7 +205,7 @@ export default function AddEmployeePage() {
                     <input
                       value={form.countryCode}
                       onChange={(e) => handleChange("countryCode", e.target.value.toUpperCase().slice(0, 2))}
-                      placeholder="NG"
+                      placeholder="USD"
                       maxLength={2}
                       className="w-full bg-surface border border-outline-variant/20 rounded-sm px-4 py-3 text-sm text-on-surface font-['IBM_Plex_Mono'] placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-[#13f09c] transition"
                     />
@@ -249,7 +249,7 @@ export default function AddEmployeePage() {
                       type="number"
                       value={form.salaryAmount}
                       onChange={(e) => handleChange("salaryAmount", e.target.value)}
-                      placeholder="85000"
+                      placeholder="19000"
                       className="w-full bg-surface border border-outline-variant/20 rounded-sm px-4 py-3 text-sm text-on-surface font-['IBM_Plex_Mono'] placeholder:text-on-surface-variant/30 focus:outline-none focus:ring-1 focus:ring-[#13f09c] transition"
                     />
                   </div>

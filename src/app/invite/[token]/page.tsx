@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { usePrivy } from "@privy-io/react-auth";
 
 interface Employee {
   id: string;
@@ -9,16 +10,22 @@ interface Employee {
   lastName: string;
   email: string;
   inviteToken: string;
+  walletAddress?: string;
+  privyUserId?: string;
+  status?: "pending" | "active";
 }
 
-type Step = "accept" | "accepted" | "invalid";
+type Step = "accept" | "authing" | "accepted" | "invalid";
 
 export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
+  const { ready, authenticated, user, login } = usePrivy();
+
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [step, setStep] = useState<Step>("accept");
   const [loading, setLoading] = useState(true);
 
+  // Load employee from localStorage
   useEffect(() => {
     const employees: Employee[] = JSON.parse(
       localStorage.getItem("locroll_employees") ?? "[]"
@@ -32,11 +39,39 @@ export default function InvitePage() {
     setLoading(false);
   }, [token]);
 
-  function handleAccept() {
+  // Once Privy authenticates after the employee clicked Accept, attach wallet to record
+  useEffect(() => {
+    if (step !== "authing" || !ready || !authenticated || !user || !employee) return;
+
+    const walletAddress =
+      user.wallet?.address ??
+      user.linkedAccounts.find((a) => a.type === "wallet")?.address;
+
+    const updated: Employee = {
+      ...employee,
+      privyUserId: user.id,
+      walletAddress: walletAddress ?? undefined,
+      status: "active",
+    };
+
+    // Patch the record in localStorage
+    const employees: Employee[] = JSON.parse(
+      localStorage.getItem("locroll_employees") ?? "[]"
+    );
+    const next = employees.map((e) => (e.inviteToken === token ? updated : e));
+    localStorage.setItem("locroll_employees", JSON.stringify(next));
+
+    setEmployee(updated);
     setStep("accepted");
+  }, [step, ready, authenticated, user, employee, token]);
+
+  function handleAccept() {
+    setStep("authing");
+    // Privy login — employee signs in with email; embedded wallet is auto-created
+    login();
   }
 
-  if (loading) {
+  if (loading || !ready) {
     return (
       <div className="min-h-screen bg-[#070d1f] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#13f09c] border-t-transparent rounded-full animate-spin" />
@@ -72,6 +107,7 @@ export default function InvitePage() {
           <span className="text-white font-bold text-lg tracking-tight">Locroll</span>
         </div>
 
+        {/* ── Step: accept ── */}
         {step === "accept" && (
           <div>
             <h1 className="text-2xl font-black text-white mb-3 tracking-tight">
@@ -81,7 +117,6 @@ export default function InvitePage() {
               Accept this invite to receive your salary onchain. Your embedded wallet will be created automatically — no crypto knowledge required.
             </p>
 
-            {/* Email field (pre-filled, readonly) */}
             <div className="mb-6">
               <label className="block text-xs text-[#dce1fb]/50 mb-2 font-['IBM_Plex_Mono'] uppercase tracking-widest">
                 Email
@@ -104,6 +139,18 @@ export default function InvitePage() {
           </div>
         )}
 
+        {/* ── Step: authing (Privy modal open, waiting) ── */}
+        {step === "authing" && (
+          <div className="text-center">
+            <div className="w-16 h-16 border-2 border-[#13f09c] border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+            <h1 className="text-xl font-black text-white mb-2">Setting up your account</h1>
+            <p className="text-[#dce1fb]/50 text-sm">
+              Complete the sign-in to activate your wallet.
+            </p>
+          </div>
+        )}
+
+        {/* ── Step: accepted ── */}
         {step === "accepted" && (
           <div className="text-center">
             <div className="w-20 h-20 rounded-full bg-[#13f09c]/20 border border-[#13f09c]/40 flex items-center justify-center mx-auto mb-6">
@@ -113,9 +160,9 @@ export default function InvitePage() {
               Welcome, {employee?.firstName}!
             </h1>
             <p className="text-[#dce1fb]/60 text-sm mb-8 leading-relaxed max-w-sm mx-auto">
-              Your invite has been accepted. Your embedded wallet is being set up. You&apos;ll receive your salary onchain once your employer runs payroll.
+              Your Locroll account is live. Your employer can now include you in payroll — funds will land directly in your wallet.
             </p>
-            <div className="bg-[#0c1324] border border-white/10 rounded-xl p-5 text-left space-y-3">
+            <div className="bg-[#0c1324] border border-white/10 rounded-xl p-5 text-left space-y-4">
               <div>
                 <div className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-[#dce1fb]/40 mb-1">Name</div>
                 <div className="text-sm text-white font-semibold">{employee?.firstName} {employee?.lastName}</div>
@@ -125,8 +172,19 @@ export default function InvitePage() {
                 <div className="text-sm text-white font-semibold">{employee?.email}</div>
               </div>
               <div>
-                <div className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-[#dce1fb]/40 mb-1">Wallet Status</div>
-                <div className="text-sm text-[#13f09c] font-semibold">Provisioning...</div>
+                <div className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-[#dce1fb]/40 mb-1">Wallet Address</div>
+                {employee?.walletAddress ? (
+                  <div className="text-sm text-[#13f09c] font-['IBM_Plex_Mono'] break-all">{employee.walletAddress}</div>
+                ) : (
+                  <div className="text-sm text-[#dce1fb]/40 font-['IBM_Plex_Mono']">Provisioning…</div>
+                )}
+              </div>
+              <div>
+                <div className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-[#dce1fb]/40 mb-1">Status</div>
+                <div className="inline-flex items-center gap-1.5 bg-[#13f09c]/10 border border-[#13f09c]/20 text-[#13f09c] text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest px-3 py-1 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#13f09c]" />
+                  Active
+                </div>
               </div>
             </div>
           </div>
