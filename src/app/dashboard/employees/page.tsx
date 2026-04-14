@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 
 export default function EmployeesPage() {
@@ -79,10 +80,10 @@ export default function EmployeesPage() {
               <span className="material-symbols-outlined text-base">upload</span>
               Upload CSV
             </button>
-            <button className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200">
+            <Link href="/dashboard/employees/add" className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200">
               <span className="material-symbols-outlined text-base">person_add</span>
               Add Employee
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -100,10 +101,10 @@ export default function EmployeesPage() {
               <span className="material-symbols-outlined text-base">upload</span>
               Upload CSV
             </button>
-            <button className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200">
+            <Link href="/dashboard/employees/add" className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200">
               <span className="material-symbols-outlined text-base">person_add</span>
               Add Employee
-            </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -11,7 +11,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (ready && authenticated) {
-      router.push("/dashboard");
+      const company = localStorage.getItem("locroll_company");
+      router.push(company ? "/dashboard" : "/onboarding");
     }
   }, [ready, authenticated, router]);
 
