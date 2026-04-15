@@ -107,7 +107,7 @@ export default function AddEmployeePage() {
   return (
     <main className="relative min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
+      <header className="sticky top-0 z-20 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-4 sm:px-6 lg:px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div>
           <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
             <span>Locroll</span>
@@ -122,7 +122,7 @@ export default function AddEmployeePage() {
         </div>
       </header>
 
-      <div className="px-10 py-10">
+      <div className="px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
         {/* Back link */}
         <Link
           href="/dashboard/employees"
@@ -139,13 +139,13 @@ export default function AddEmployeePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           {/* Main card */}
-          <div className="xl:col-span-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-8">
+          <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-6 sm:p-8">
             {!created ? (
               /* ─── FORM ─── */
               <form onSubmit={handleSubmit} noValidate>
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {/* First Name */}
                   <div>
                     <label className="block text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant mb-2">

@@ -152,7 +152,7 @@ export default function PayrollPage() {
 
   return (
     <main className="relative min-h-screen">
-      <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
+      <header className="sticky top-0 z-20 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-4 sm:px-6 lg:px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div>
           <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
             <span>Locroll</span>
@@ -181,7 +181,7 @@ export default function PayrollPage() {
         </div>
       </header>
 
-      <div className="px-10 py-10">
+      <div className="px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
         <div className="flex items-start justify-between mb-8">
           <div>
             <Link href="/dashboard" className="inline-flex items-center gap-1 text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant hover:text-[#13f09c] transition-colors mb-3">
@@ -210,12 +210,12 @@ export default function PayrollPage() {
             </div>
             <div className="space-y-2">
               {success.lines.map((l, i) => (
-                <div key={i} className="flex items-center justify-between text-sm py-2 border-t border-white/5">
+                <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm py-2 border-t border-white/5 gap-1 sm:gap-0">
                   <div>
                     <span className="text-on-surface font-semibold">{l.name}</span>
-                    <span className="text-on-surface-variant ml-3 font-['IBM_Plex_Mono'] text-[10px]">{l.walletAddress.slice(0, 10)}…{l.walletAddress.slice(-6)}</span>
+                    <span className="text-on-surface-variant ml-2 font-['IBM_Plex_Mono'] text-[10px] break-all sm:break-normal">{l.walletAddress.slice(0, 8)}…{l.walletAddress.slice(-4)}</span>
                   </div>
-                  <span className="text-[#13f09c] font-bold font-['IBM_Plex_Mono']">{l.amount} {l.currency}</span>
+                  <span className="text-[#13f09c] font-bold font-['IBM_Plex_Mono'] shrink-0">{l.amount} {l.currency}</span>
                 </div>
               ))}
             </div>
@@ -248,7 +248,8 @@ export default function PayrollPage() {
                     Amounts are editable per run
                   </span>
                 </div>
-                <table className="w-full text-xs font-['IBM_Plex_Mono']">
+                <div className="overflow-x-auto">
+                <table className="w-full text-xs font-['IBM_Plex_Mono'] min-w-[560px]">
                   <thead className="bg-surface-container">
                     <tr>
                       {["Employee", "Wallet", "Amount", "Currency"].map((h) => (
@@ -292,8 +293,9 @@ export default function PayrollPage() {
                     })}
                   </tbody>
                 </table>
+                </div>
 
-                <div className="px-6 py-5 border-t border-outline-variant/10 flex items-center justify-between">
+                <div className="px-6 py-5 border-t border-outline-variant/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
                   <div className="space-y-0.5">
                     {currencies.map((c) => (
                       <div key={c} className="text-xs text-on-surface-variant">
@@ -304,7 +306,7 @@ export default function PayrollPage() {
                   <button
                     onClick={handleRunPayroll}
                     disabled={running || payrollReady.every((e) => !lines[e.id]?.amount && !e.salaryAmount)}
-                    className="flex items-center gap-2 liquid-gradient text-on-primary font-black px-8 py-3 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 liquid-gradient text-on-primary font-black px-6 sm:px-8 py-3 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto justify-center"
                   >
                     {running ? (
                       <>

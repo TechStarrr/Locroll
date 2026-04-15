@@ -70,7 +70,7 @@ export default function DashboardPage() {
 
   return (
     <main className="relative min-h-screen">
-      <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
+      <header className="sticky top-0 z-20 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-4 sm:px-6 lg:px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div className="flex items-center gap-8">
           <div>
             <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest">
@@ -95,15 +95,15 @@ export default function DashboardPage() {
             <button className="text-[#dce1fb] hover:text-[#13f09c] transition-colors duration-300">
               <span className="material-symbols-outlined">notifications</span>
             </button>
-            <button className="text-[#dce1fb] hover:text-[#13f09c] transition-colors duration-300">
+            <button className="hidden sm:flex text-[#dce1fb] hover:text-[#13f09c] transition-colors duration-300">
               <span className="material-symbols-outlined">help_outline</span>
             </button>
           </div>
-          <div className="h-8 w-[1px] bg-outline-variant/20 mx-2"></div>
-          <button className="liquid-gradient text-on-primary font-bold px-6 py-2 rounded-sm text-xs uppercase tracking-widest flex items-center gap-2 hover:scale-95 duration-200">
+          <div className="h-8 w-[1px] bg-outline-variant/20 mx-2 hidden sm:block"></div>
+          <Link href="/dashboard/payroll" className="liquid-gradient text-on-primary font-bold px-4 sm:px-6 py-2 rounded-sm text-xs uppercase tracking-widest hidden sm:flex items-center gap-2 hover:scale-95 duration-200">
             <span>Run Payroll</span>
             <span className="material-symbols-outlined text-sm">bolt</span>
-          </button>
+          </Link>
           <div className="flex items-center gap-3 ml-2">
             <div className="text-right hidden sm:block">
               <div className="text-[10px] font-['IBM_Plex_Mono'] text-on-surface-variant uppercase">SYS_ADMIN</div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="px-10 py-10">
+      <div className="px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
           <StatCard title="Treasury Balance" value={balanceLabel} unit="USDC" icon="account_balance" status={balanceStatus} />
           <StatCard title="Last Payroll Run" value={lastRunLabel} italic={!lastRun} icon="history" />
@@ -148,8 +148,8 @@ export default function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden">
-                <table className="w-full text-xs font-['IBM_Plex_Mono']">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs font-['IBM_Plex_Mono'] min-w-[400px]">
                   <thead className="bg-surface-container">
                     <tr>
                       {["Date", "Recipients", "Total", "Status"].map((h) => (
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <footer className="px-10 py-8 border-t border-outline-variant/5 flex flex-col md:flex-row justify-between items-center gap-6">
+      <footer className="px-4 sm:px-6 lg:px-10 py-8 border-t border-outline-variant/5 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-6">
           <span className="font-['IBM_Plex_Mono'] text-[10px] text-on-surface-variant tracking-widest uppercase">© 2026 LOCROLL</span>
           <div className="flex gap-4">

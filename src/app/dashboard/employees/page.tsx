@@ -289,7 +289,7 @@ export default function EmployeesPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
+      <header className="sticky top-0 z-20 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-4 sm:px-6 lg:px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div className="flex items-center gap-8">
           <div>
             <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
@@ -338,7 +338,7 @@ export default function EmployeesPage() {
       </header>
 
       {/* Page content */}
-      <div className="px-10 py-10">
+      <div className="px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
         {/* Title row */}
         <div className="flex items-start justify-between mb-10">
           <div>
@@ -347,20 +347,20 @@ export default function EmployeesPage() {
               {employees.length} employee{employees.length !== 1 ? "s" : ""} · manage your team
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 border border-outline-variant/30 text-on-surface bg-surface-container-highest hover:bg-surface-container-high px-5 py-2.5 rounded-sm text-xs font-['IBM_Plex_Mono'] uppercase tracking-widest transition-all duration-200"
+              className="flex items-center gap-2 border border-outline-variant/30 text-on-surface bg-surface-container-highest hover:bg-surface-container-high px-3 sm:px-5 py-2.5 rounded-sm text-xs font-['IBM_Plex_Mono'] uppercase tracking-widest transition-all duration-200"
             >
               <span className="material-symbols-outlined text-base">upload</span>
-              Upload CSV
+              <span className="hidden sm:inline">Upload CSV</span>
             </button>
             <Link
               href="/dashboard/employees/add"
-              className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200"
+              className="flex items-center gap-2 liquid-gradient text-on-primary font-bold px-3 sm:px-5 py-2.5 rounded-sm text-xs uppercase tracking-widest hover:scale-95 duration-200"
             >
               <span className="material-symbols-outlined text-base">person_add</span>
-              Add Employee
+              <span className="hidden sm:inline">Add Employee</span>
             </Link>
           </div>
         </div>
@@ -400,7 +400,8 @@ export default function EmployeesPage() {
         ) : (
           /* Employee table */
           <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden">
-            <table className="w-full text-xs font-['IBM_Plex_Mono']">
+            <div className="overflow-x-auto">
+            <table className="w-full text-xs font-['IBM_Plex_Mono'] min-w-[640px]">
               <thead className="bg-surface-container border-b border-outline-variant/10">
                 <tr>
                   {["Name", "Email", "Role", "Department", "Salary", "Status", ""].map((h) => (
@@ -459,11 +460,12 @@ export default function EmployeesPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>
 
-      <footer className="px-10 py-8 border-t border-outline-variant/5 flex flex-col md:flex-row justify-between items-center gap-6 mt-auto">
+      <footer className="px-4 sm:px-6 lg:px-10 py-8 border-t border-outline-variant/5 flex flex-col md:flex-row justify-between items-center gap-6 mt-auto">
         <div className="flex items-center gap-6">
           <span className="font-['IBM_Plex_Mono'] text-[10px] text-on-surface-variant tracking-widest uppercase">© 2026 LOCROLL</span>
           <div className="flex gap-4">

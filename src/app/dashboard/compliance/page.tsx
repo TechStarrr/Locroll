@@ -103,7 +103,7 @@ export default function CompliancePage() {
 
   return (
     <main className="relative min-h-screen">
-      <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
+      <header className="sticky top-0 z-20 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-4 sm:px-6 lg:px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div>
           <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
             <span>Locroll</span>
@@ -134,7 +134,7 @@ export default function CompliancePage() {
         </div>
       </header>
 
-      <div className="px-10 py-10">
+      <div className="px-4 sm:px-6 lg:px-10 py-6 lg:py-10">
         {/* Title row */}
         <div className="mb-8">
           <h2 className="text-2xl font-black tracking-tight text-on-surface">Compliance</h2>
@@ -188,7 +188,8 @@ export default function CompliancePage() {
               </Link>
             </div>
           ) : (
-            <table className="w-full text-xs font-['IBM_Plex_Mono']">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs font-['IBM_Plex_Mono'] min-w-[560px]">
               <thead className="bg-surface-container">
                 <tr>
                   {["Employee", "KYC Status", "Last Checked", "Profile"].map((h) => (
@@ -233,6 +234,7 @@ export default function CompliancePage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
