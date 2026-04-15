@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendInviteEmail } from "@/lib/email";
 
 // POST /api/employees/bulk — create multiple employees at once (CSV import)
 export async function POST(req: NextRequest) {
@@ -38,6 +39,17 @@ export async function POST(req: NextRequest) {
     })),
     skipDuplicates: true,
   });
+
+  // Send invite emails to all successfully created employees — fire and forget
+  const company = await prisma.company.findUnique({ where: { id: companyId } });
+  for (const e of employees) {
+    sendInviteEmail({
+      to: e.email,
+      firstName: e.firstName,
+      companyName: company?.name ?? "Your company",
+      inviteLink: e.inviteLink,
+    }).catch(() => {});
+  }
 
   return NextResponse.json({ count: result.count }, { status: 201 });
 }

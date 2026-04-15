@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { sendInviteEmail } from "@/lib/email";
 
 function getCompanyId(req: NextRequest): string | null {
   return req.cookies.get("locroll_cid")?.value ?? null;
@@ -46,6 +47,15 @@ export async function POST(req: NextRequest) {
         status: "pending",
       },
     });
+    // Send invite email — fire and forget, don't block the response
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    sendInviteEmail({
+      to: employee.email,
+      firstName: employee.firstName,
+      companyName: company?.name ?? "Your company",
+      inviteLink: employee.inviteLink,
+    }).catch(() => {}); // silent fail — email is best-effort
+
     return NextResponse.json({ employee }, { status: 201 });
   } catch (err: unknown) {
     if (err instanceof Error && err.message.includes("Unique constraint")) {
