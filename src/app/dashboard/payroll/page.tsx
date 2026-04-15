@@ -122,7 +122,7 @@ export default function PayrollPage() {
     }
   }
 
-  async function executePayrollDistribution() {
+  async function executePayrollDistribution(sessionId: string) {
     const runLines = pendingRunLinesRef.current;
     let runResult: PayrollRun | null = null;
 
@@ -130,7 +130,7 @@ export default function PayrollPage() {
       const res = await fetch("/api/payroll/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines: runLines }),
+        body: JSON.stringify({ lines: runLines, checkoutSessionId: sessionId }),
       });
       const json = await res.json();
       runResult = json.run ?? null;
@@ -201,21 +201,35 @@ export default function PayrollPage() {
           </div>
         </div>
 
-        {/* Locus Checkout — embedded payment widget shown after session creation */}
+        {/* Locus Checkout modal */}
         {checkoutSession && (
-          <div className="mb-8 bg-surface-container-lowest border border-[#13f09c]/20 rounded-xl overflow-hidden">
-            <div className="px-6 py-3 border-b border-outline-variant/10 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#13f09c] text-base">lock</span>
-              <span className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant">
-                Secure USDC payment — powered by Locus
-              </span>
-            </div>
-            <div className="p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-[#070d1f]/80 backdrop-blur-sm"
+              onClick={() => { setCheckoutSession(null); setRunning(false); }}
+            />
+            {/* Modal panel */}
+            <div className="relative w-full max-w-lg bg-[#0c1324] border border-[#13f09c]/20 rounded-xl shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[#13f09c] text-base">lock</span>
+                  <span className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant">
+                    Secure USDC payment — powered by Locus
+                  </span>
+                </div>
+                <button
+                  onClick={() => { setCheckoutSession(null); setRunning(false); }}
+                  className="text-on-surface-variant hover:text-on-surface transition-colors"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
               <LocusCheckout
                 sessionId={checkoutSession.sessionId}
                 checkoutUrl={checkoutSession.checkoutUrl}
                 mode="embedded"
-                onSuccess={async () => { await executePayrollDistribution(); }}
+                onSuccess={async (data) => { await executePayrollDistribution(checkoutSession.sessionId); }}
                 onCancel={() => { setCheckoutSession(null); setRunning(false); }}
                 onError={() => { setCheckoutSession(null); setRunning(false); }}
               />

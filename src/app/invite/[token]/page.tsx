@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -19,11 +19,12 @@ type Step = "accept" | "authing" | "accepted" | "invalid";
 
 export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
-  const { ready, authenticated, user, login } = usePrivy();
+  const { ready, authenticated, user, login, logout, createWallet } = usePrivy();
 
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [step, setStep] = useState<Step>("accept");
   const [loading, setLoading] = useState(true);
+  const activatingRef = useRef(false);
 
   // Load employee from API
   useEffect(() => {
@@ -42,33 +43,64 @@ export default function InvitePage() {
 
   // Once Privy authenticates after the employee clicked Accept, attach wallet to record
   useEffect(() => {
-    if (step !== "authing" || !ready || !authenticated || !user || !employee) return;
+    if (step !== "authing" || !ready || !employee || activatingRef.current) return;
+    if (!authenticated || !user) return;
 
-    const walletAddress =
-      user.wallet?.address ??
-      user.linkedAccounts.find((a) => a.type === "wallet")?.address;
+    // If a different user (e.g. the employer) is already logged in, log them out
+    // and re-trigger login so the employee signs in with their own account
+    const loggedInEmail = user.email?.address ?? "";
+    if (loggedInEmail && loggedInEmail !== employee.email) {
+      logout().then(() => login());
+      return;
+    }
 
-    fetch(`/api/employees/${employee.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status: "active",
-        walletAddress: walletAddress ?? null,
-        privyUserId: user.id,
-      }),
-    })
-      .then((r) => r.json())
-      .then((j) => {
+    activatingRef.current = true;
+
+    async function activate() {
+      if (!user || !employee) return;
+
+      // createWallet() returns the new wallet directly (with .address)
+      // If the user already has one it throws — fall back to user.wallet.address
+      let walletAddress: string | undefined = user.wallet?.address;
+      if (!walletAddress) {
+        try {
+          const created = await createWallet();
+          walletAddress = created?.address;
+        } catch {
+          walletAddress = user.wallet?.address;
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/employees/${employee.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "active",
+            walletAddress: walletAddress ?? null,
+            privyUserId: user.id,
+          }),
+        });
+        const j = await res.json();
         if (j.employee) setEmployee(j.employee);
-        setStep("accepted");
-      })
-      .catch(() => setStep("accepted")); // still show success even if patch fails
-  }, [step, ready, authenticated, user, employee, token]);
+      } catch {
+        // still show success
+      }
+
+      activatingRef.current = false;
+      setStep("accepted");
+    }
+
+    activate();
+  }, [step, ready, authenticated, user, employee, login, logout, createWallet]);
 
   function handleAccept() {
     setStep("authing");
-    // Privy login — employee signs in with email; embedded wallet is auto-created
-    login();
+    // If already authenticated as someone else, the useEffect will handle logout+login
+    // If not authenticated, launch Privy login modal now
+    if (!authenticated) {
+      login();
+    }
   }
 
   if (loading || !ready) {

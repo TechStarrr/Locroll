@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const companyId = req.cookies.get("locroll_cid")?.value;
   if (!companyId) return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
 
-  let body: { lines: PayrollLineInput[] };
+  let body: { lines: PayrollLineInput[]; checkoutSessionId?: string };
 
   try {
     body = await req.json();
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
   }
 
-  const { lines } = body;
+  const { lines, checkoutSessionId } = body;
 
   if (!lines || !Array.isArray(lines) || lines.length === 0) {
     return NextResponse.json({ success: false, error: "No payroll lines provided" }, { status: 400 });
@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
   const total = lines.reduce((s, l) => s + l.amount, 0).toFixed(2);
   const primaryCurrency = lines[0]?.currency ?? "USD";
 
-  // Persist the run record before executing payments
+  // Persist the run record before executing payments.
+  // checkoutSessionId means the employer funded via Locus Checkout; we still
+  // need to distribute from the merchant Locus balance to each employee.
   const run = await prisma.payrollRun.create({
     data: {
       companyId,
