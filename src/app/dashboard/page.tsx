@@ -1,11 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
+import Link from "next/link";
 import StatCard from "@/components/StatCard";
 import SectionHeader from "@/components/SectionHeader";
 
+interface PayrollRun {
+  id: string;
+  date: string;
+  lines: { name: string; email: string; amount: string; currency: string }[];
+  total: string;
+  currency: string;
+  status: "completed" | "pending";
+}
+
 export default function DashboardPage() {
   const { user, logout } = usePrivy();
+
+  const [balance, setBalance] = useState<string | null>(null);
+  const [balanceError, setBalanceError] = useState(false);
+  const [teamSize, setTeamSize] = useState(0);
+  const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
+
+  useEffect(() => {
+    // Load localStorage data
+    const employees = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
+    setTeamSize(employees.length);
+    const runs = JSON.parse(localStorage.getItem("locroll_payroll_runs") ?? "[]");
+    setPayrollRuns(runs);
+
+    // Fetch real balance from Locus
+    fetch("/api/locus/balance")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          setBalance(json.data.balance);
+        } else {
+          setBalanceError(true);
+        }
+      })
+      .catch(() => setBalanceError(true));
+  }, []);
 
   const displayName =
     user?.email?.address ??
@@ -14,6 +50,17 @@ export default function DashboardPage() {
       : "User");
 
   const initials = displayName.slice(0, 2).toUpperCase();
+
+  const lastRun = payrollRuns[0];
+  const lastRunLabel = lastRun
+    ? new Date(lastRun.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    : "NO_RECENT_ACTIVITY";
+
+  const balanceLabel = balanceError
+    ? "UNAVAILABLE"
+    : balance === null
+    ? "…"
+    : `$${parseFloat(balance).toFixed(2)}`;
 
   return (
     <main className="relative min-h-screen">
@@ -73,27 +120,58 @@ export default function DashboardPage() {
 
       <div className="px-10 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Treasury Balance" value="$0.00" unit="USD" icon="account_balance" status="ACCOUNT_SYNCED" />
-          <StatCard title="Last Payroll Run" value="NO_RECENT_ACTIVITY" italic icon="history" />
-          <StatCard title="Team Size" value="0" unit="USERS" icon="groups" pending />
+          <StatCard title="Treasury Balance" value={balanceLabel} unit="USDC" icon="account_balance" status={balanceError ? "ERROR" : balance === null ? "SYNCING…" : "ACCOUNT_SYNCED"} />
+          <StatCard title="Last Payroll Run" value={lastRunLabel} italic={!lastRun} icon="history" />
+          <StatCard title="Team Size" value={String(teamSize)} unit="USERS" icon="groups" pending={teamSize === 0} />
           <StatCard title="Yield Earned" value="$0.00" icon="trending_up" yieldText="3.7% APY" />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-2 space-y-6">
             <SectionHeader title="Recent payroll runs" />
-            <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-16 flex flex-col items-center justify-center text-center">
-              <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-6 border border-[#13f09c]/10">
-                <span className="material-symbols-outlined text-4xl text-[#13f09c]/20">inventory_2</span>
+            {payrollRuns.length === 0 ? (
+              <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-xl p-16 flex flex-col items-center justify-center text-center">
+                <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-6 border border-[#13f09c]/10">
+                  <span className="material-symbols-outlined text-4xl text-[#13f09c]/20">inventory_2</span>
+                </div>
+                <h3 className="text-xl font-black text-on-surface mb-2 tracking-tight">No payroll runs yet</h3>
+                <p className="text-on-surface-variant max-w-sm mb-10 text-sm leading-relaxed">
+                  Once your first payroll batch is executed, runs will appear here.
+                </p>
+                <Link href="/dashboard/payroll" className="bg-surface-container-highest hover:bg-surface-container-high text-[#13f09c] border border-[#13f09c]/20 font-bold px-8 py-3 rounded-sm text-[10px] uppercase tracking-widest transition-all duration-200">
+                  Run Payroll
+                </Link>
               </div>
-              <h3 className="text-xl font-black text-on-surface mb-2 tracking-tight">No payroll runs yet</h3>
-              <p className="text-on-surface-variant max-w-sm mb-10 text-sm leading-relaxed">
-                Once your first payroll batch is prepared and submitted, recent runs will show up here for tracking and management.
-              </p>
-              <button className="bg-surface-container-highest hover:bg-surface-container-high text-[#13f09c] border border-[#13f09c]/20 font-bold px-8 py-3 rounded-sm text-[10px] uppercase tracking-widest transition-all duration-200">
-                Create first payroll
-              </button>
-            </div>
+            ) : (
+              <div className="bg-surface-container-lowest border border-outline-variant/10 rounded-xl overflow-hidden">
+                <table className="w-full text-xs font-['IBM_Plex_Mono']">
+                  <thead className="bg-surface-container">
+                    <tr>
+                      {["Date", "Recipients", "Total", "Status"].map((h) => (
+                        <th key={h} className="text-left px-6 py-3 text-[10px] uppercase tracking-widest text-on-surface-variant font-normal">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payrollRuns.slice(0, 10).map((run) => (
+                      <tr key={run.id} className="border-t border-outline-variant/5">
+                        <td className="px-6 py-4 text-on-surface">
+                          {new Date(run.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        </td>
+                        <td className="px-6 py-4 text-on-surface-variant">{run.lines.length}</td>
+                        <td className="px-6 py-4 text-[#13f09c] font-bold">{run.total} {run.currency}</td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center gap-1 text-[#13f09c] bg-[#13f09c]/10 border border-[#13f09c]/20 text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#13f09c]" />
+                            {run.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">

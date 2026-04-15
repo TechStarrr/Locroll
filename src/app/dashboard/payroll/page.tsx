@@ -89,26 +89,51 @@ export default function PayrollPage() {
 
   const currencies = [...new Set(payrollReady.map((e) => lines[e.id]?.currency || e.currency || "USD"))];
 
-  function handleRunPayroll() {
+  async function handleRunPayroll() {
     setRunning(true);
+    const runId = crypto.randomUUID();
+
     const runLines = payrollReady.map((e) => ({
+      employeeId: e.id,
       name: `${e.firstName} ${e.lastName}`,
       email: e.email,
-      amount: lines[e.id]?.amount || e.salaryAmount || "0",
+      amount: parseFloat(lines[e.id]?.amount || e.salaryAmount || "0"),
       currency: lines[e.id]?.currency || e.currency || "USD",
-      walletAddress: e.walletAddress!,
+      walletAddress: e.walletAddress,
     }));
 
-    const total = runLines.reduce((s, l) => s + parseFloat(l.amount), 0).toFixed(2);
+    const total = runLines.reduce((s, l) => s + l.amount, 0).toFixed(2);
     const primaryCurrency = runLines[0]?.currency ?? "USD";
 
+    let runStatus: "completed" | "pending" = "pending";
+
+    try {
+      const res = await fetch("/api/payroll/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lines: runLines, runId }),
+      });
+      const json = await res.json();
+      runStatus = json.success ? "completed" : "pending";
+    } catch {
+      // Network error — still record run locally
+    }
+
+    const displayLines = runLines.map((l) => ({
+      name: l.name,
+      email: l.email,
+      amount: String(l.amount),
+      currency: l.currency,
+      walletAddress: l.walletAddress ?? l.email,
+    }));
+
     const run: PayrollRun = {
-      id: crypto.randomUUID(),
+      id: runId,
       date: new Date().toISOString(),
-      lines: runLines,
+      lines: displayLines,
       total,
       currency: primaryCurrency,
-      status: "completed",
+      status: runStatus,
     };
 
     const existing: PayrollRun[] = JSON.parse(localStorage.getItem("locroll_payroll_runs") ?? "[]");
@@ -116,15 +141,13 @@ export default function PayrollPage() {
     localStorage.setItem("locroll_payroll_runs", JSON.stringify(updated));
     setRuns(updated);
 
-    // Log for Audit
+    // Audit log
     const auditLog: object[] = JSON.parse(localStorage.getItem("locroll_audit_log") ?? "[]");
     auditLog.unshift({ type: "PAYROLL_RUN", runId: run.id, date: run.date, total: run.total, currency: run.currency, count: run.lines.length });
     localStorage.setItem("locroll_audit_log", JSON.stringify(auditLog));
 
-    setTimeout(() => {
-      setRunning(false);
-      setSuccess(run);
-    }, 1800);
+    setRunning(false);
+    setSuccess(run);
   }
 
   return (
