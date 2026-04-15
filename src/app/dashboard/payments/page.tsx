@@ -38,7 +38,7 @@ export default function PaymentsPage() {
     ])
       .then(([bal, txs]) => {
         if (bal.success) {
-          setBalance(bal.data.balance);
+          setBalance(bal.data.usdc_balance);
           setWalletAddress(bal.data.wallet_address ?? null);
         }
         if (txs.success) {

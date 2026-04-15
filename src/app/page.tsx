@@ -7,7 +7,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 w-full z-50 bg-[#0c1324]/60 backdrop-blur-xl transition-all duration-300">
         <div className="flex justify-between items-center px-8 py-6 max-w-screen-2xl mx-auto">
           <Link href="/" className="text-xl font-black uppercase tracking-tighter text-[#13f09c]">
-            NEON_NOIR
+            LOCROLL
           </Link>
           <div className="hidden md:flex items-center gap-8">
             <a className="text-[#dce1fb] font-medium hover:text-[#13f09c] transition-colors duration-300" href="#">Services</a>

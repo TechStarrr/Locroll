@@ -6,8 +6,8 @@ export async function GET(req: NextRequest) {
   const companyId = req.cookies.get("locroll_cid")?.value;
   if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) return NextResponse.json({ error: "API_KEY not configured" }, { status: 500 });
+  const apiKey = process.env.LOCUS_PAY_KEY;
+  if (!apiKey) return NextResponse.json({ error: "LOCUS_PAY_KEY not configured" }, { status: 500 });
 
   try {
     const res = await fetch(`${LOCUS_API_BASE}/pay/transactions`, {
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     });
     const json = await res.json();
     if (!json.success) throw new Error(json.message ?? "Failed");
-    return NextResponse.json({ success: true, transactions: json.data ?? [] });
+    return NextResponse.json({ success: true, transactions: json.data?.transactions ?? [] });
   } catch (err) {
     return NextResponse.json(
       { success: false, error: err instanceof Error ? err.message : "Unknown error", transactions: [] },

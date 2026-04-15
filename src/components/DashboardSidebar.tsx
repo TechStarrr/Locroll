@@ -14,7 +14,6 @@ const mainNav = [
   { icon: "payments", label: "Payroll", href: "/dashboard/payroll" },
   { icon: "account_balance_wallet", label: "Payments", href: "/dashboard/payments" },
   { icon: "verified_user", label: "Compliance", href: "/dashboard/compliance" },
-  { icon: "credit_card", label: "Cards", href: "/dashboard/cards" },
 ];
 
 const bottomNav = [

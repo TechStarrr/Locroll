@@ -14,9 +14,9 @@ function authHeaders() {
 }
 
 export interface LocusBalance {
-  balance: string;
-  token: string;
+  usdc_balance: string;
   wallet_address: string;
+  chain: string;
 }
 
 export interface LocusTransaction {
