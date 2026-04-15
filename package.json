@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "start": "node .next/standalone/server.js",
     "lint": "eslint",
     "postinstall": "prisma generate"
@@ -16,6 +17,7 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@privy-io/react-auth": "^3.21.2",
+    "@withlocus/checkout-react": "^1.2.0",
     "next": "16.2.3",
     "pg": "^8.20.0",
     "prisma": "^7.7.0",

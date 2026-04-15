@@ -1,8 +1,8 @@
 const LOCUS_API_BASE = "https://api.paywithlocus.com/api";
 
 function getApiKey(): string {
-  const key = process.env.API_KEY;
-  if (!key) throw new Error("LOCUS API_KEY not configured");
+  const key = process.env.LOCUS_PAYMENT_KEY;
+  if (!key) throw new Error("LOCUS_PAYMENT_KEY not configured");
   return key;
 }
 

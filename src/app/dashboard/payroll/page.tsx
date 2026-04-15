@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
+import { LocusCheckout } from "@withlocus/checkout-react";
 
 interface Employee {
   id: string;
@@ -52,6 +53,8 @@ export default function PayrollPage() {
   const [runs, setRuns] = useState<PayrollRun[]>([]);
   const [running, setRunning] = useState(false);
   const [success, setSuccess] = useState<PayrollRun | null>(null);
+  const [checkoutSession, setCheckoutSession] = useState<{ sessionId: string; checkoutUrl: string } | null>(null);
+  const pendingRunLinesRef = useRef<{ employeeId: string; name: string; email: string; amount: number; currency: string; walletAddress?: string }[]>([]);
 
   const payrollReady = allEmployees.filter((e) => e.status === "active" && e.walletAddress);
 
@@ -102,8 +105,26 @@ export default function PayrollPage() {
       walletAddress: e.walletAddress,
     }));
 
+    const total = runLines.reduce((s, l) => s + l.amount, 0);
+
+    try {
+      const res = await fetch("/api/payroll/checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ total, lineCount: runLines.length }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error ?? "Checkout session failed");
+      pendingRunLinesRef.current = runLines;
+      setCheckoutSession({ sessionId: json.sessionId, checkoutUrl: json.checkoutUrl });
+    } catch {
+      setRunning(false);
+    }
+  }
+
+  async function executePayrollDistribution() {
+    const runLines = pendingRunLinesRef.current;
     let runResult: PayrollRun | null = null;
-    let apiSuccess = false;
 
     try {
       const res = await fetch("/api/payroll/run", {
@@ -112,14 +133,12 @@ export default function PayrollPage() {
         body: JSON.stringify({ lines: runLines }),
       });
       const json = await res.json();
-      apiSuccess = json.success;
       runResult = json.run ?? null;
     } catch {
-      // Network error — UI will show error state
+      // Payment already captured — record the run best-effort
     }
 
     if (runResult) {
-      // Build a display-compatible run from the DB response
       const displayRun: PayrollRun = {
         ...runResult,
         lines: runLines.map((l) => ({
@@ -134,6 +153,8 @@ export default function PayrollPage() {
       setSuccess(displayRun);
     }
 
+    pendingRunLinesRef.current = [];
+    setCheckoutSession(null);
     setRunning(false);
   }
 
@@ -179,6 +200,28 @@ export default function PayrollPage() {
             <p className="text-sm text-on-surface-variant mt-1">Send on-chain payments to your team in seconds.</p>
           </div>
         </div>
+
+        {/* Locus Checkout — embedded payment widget shown after session creation */}
+        {checkoutSession && (
+          <div className="mb-8 bg-surface-container-lowest border border-[#13f09c]/20 rounded-xl overflow-hidden">
+            <div className="px-6 py-3 border-b border-outline-variant/10 flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#13f09c] text-base">lock</span>
+              <span className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant">
+                Secure USDC payment — powered by Locus
+              </span>
+            </div>
+            <div className="p-6">
+              <LocusCheckout
+                sessionId={checkoutSession.sessionId}
+                checkoutUrl={checkoutSession.checkoutUrl}
+                mode="embedded"
+                onSuccess={async () => { await executePayrollDistribution(); }}
+                onCancel={() => { setCheckoutSession(null); setRunning(false); }}
+                onError={() => { setCheckoutSession(null); setRunning(false); }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Success state */}
         {success && (
