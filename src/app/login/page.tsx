@@ -13,19 +13,11 @@ export default function LoginPage() {
     if (!ready || !authenticated || !user) return;
 
     async function checkCompany() {
-      // First check if we have a locally cached company ID
-      const cachedId = localStorage.getItem("locroll_company_id");
-      if (cachedId) { router.push("/dashboard"); return; }
-
-      // Otherwise look up by Privy user ID
+      // Look up company by Privy user ID — API will set the HttpOnly cookie if found
       const res = await fetch(`/api/company?privyUserId=${encodeURIComponent(user!.id)}`);
       if (res.ok) {
         const { company } = await res.json();
-        if (company) {
-          localStorage.setItem("locroll_company_id", company.id);
-          router.push("/dashboard");
-          return;
-        }
+        if (company) { router.push("/dashboard"); return; }
       }
       router.push("/onboarding");
     }

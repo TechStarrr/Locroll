@@ -56,10 +56,7 @@ export default function PayrollPage() {
   const payrollReady = allEmployees.filter((e) => e.status === "active" && e.walletAddress);
 
   useEffect(() => {
-    const companyId = localStorage.getItem("locroll_company_id");
-    if (!companyId) return;
-
-    fetch(`/api/employees?companyId=${companyId}`)
+    fetch("/api/employees")
       .then((r) => r.json())
       .then((j) => {
         const emps: Employee[] = j.employees ?? [];
@@ -74,7 +71,7 @@ export default function PayrollPage() {
       })
       .catch(() => {});
 
-    fetch(`/api/payroll/run?companyId=${companyId}`)
+    fetch("/api/payroll/run")
       .then((r) => r.json())
       .then((j) => setRuns(j.runs ?? []))
       .catch(() => {});
@@ -95,7 +92,6 @@ export default function PayrollPage() {
 
   async function handleRunPayroll() {
     setRunning(true);
-    const companyId = localStorage.getItem("locroll_company_id");
 
     const runLines = payrollReady.map((e) => ({
       employeeId: e.id,
@@ -113,7 +109,7 @@ export default function PayrollPage() {
       const res = await fetch("/api/payroll/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyId, lines: runLines }),
+        body: JSON.stringify({ lines: runLines }),
       });
       const json = await res.json();
       apiSuccess = json.success;

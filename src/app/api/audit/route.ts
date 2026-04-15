@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// GET /api/audit?companyId=...
+// GET /api/audit
 export async function GET(req: NextRequest) {
-  const companyId = req.nextUrl.searchParams.get("companyId");
-  if (!companyId) return NextResponse.json({ error: "companyId required" }, { status: 400 });
+  const companyId = req.cookies.get("locroll_cid")?.value;
+  if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const logs = await prisma.auditLog.findMany({
     where: { companyId },

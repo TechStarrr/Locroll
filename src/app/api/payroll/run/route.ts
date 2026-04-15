@@ -13,7 +13,10 @@ interface PayrollLineInput {
 
 // POST /api/payroll/run
 export async function POST(req: NextRequest) {
-  let body: { companyId: string; lines: PayrollLineInput[] };
+  const companyId = req.cookies.get("locroll_cid")?.value;
+  if (!companyId) return NextResponse.json({ success: false, error: "Not authenticated" }, { status: 401 });
+
+  let body: { lines: PayrollLineInput[] };
 
   try {
     body = await req.json();
@@ -21,11 +24,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
   }
 
-  const { companyId, lines } = body;
-
-  if (!companyId) {
-    return NextResponse.json({ success: false, error: "companyId required" }, { status: 400 });
-  }
+  const { lines } = body;
 
   if (!lines || !Array.isArray(lines) || lines.length === 0) {
     return NextResponse.json({ success: false, error: "No payroll lines provided" }, { status: 400 });
@@ -112,10 +111,10 @@ export async function POST(req: NextRequest) {
   );
 }
 
-// GET /api/payroll/run?companyId=...
+// GET /api/payroll/run
 export async function GET(req: NextRequest) {
-  const companyId = req.nextUrl.searchParams.get("companyId");
-  if (!companyId) return NextResponse.json({ error: "companyId required" }, { status: 400 });
+  const companyId = req.cookies.get("locroll_cid")?.value;
+  if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const runs = await prisma.payrollRun.findMany({
     where: { companyId },

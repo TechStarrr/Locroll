@@ -3,9 +3,11 @@ import { prisma } from "@/lib/db";
 
 // POST /api/employees/bulk — create multiple employees at once (CSV import)
 export async function POST(req: NextRequest) {
+  const companyId = req.cookies.get("locroll_cid")?.value;
+  if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
   const body = await req.json();
-  const { companyId, employees } = body as {
-    companyId: string;
+  const { employees } = body as {
     employees: {
       firstName: string; lastName: string; email: string; countryCode?: string;
       jobTitle?: string; department?: string; salaryAmount?: string;
@@ -13,8 +15,8 @@ export async function POST(req: NextRequest) {
     }[];
   };
 
-  if (!companyId || !Array.isArray(employees) || employees.length === 0) {
-    return NextResponse.json({ error: "companyId and employees array required" }, { status: 400 });
+  if (!Array.isArray(employees) || employees.length === 0) {
+    return NextResponse.json({ error: "employees array required" }, { status: 400 });
   }
 
   // Use createMany but skip duplicates

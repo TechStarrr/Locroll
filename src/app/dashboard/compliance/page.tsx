@@ -51,15 +51,12 @@ export default function CompliancePage() {
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
 
   const load = useCallback(() => {
-    const companyId = localStorage.getItem("locroll_company_id");
-    if (!companyId) return;
-
-    fetch(`/api/employees?companyId=${companyId}`)
+    fetch("/api/employees")
       .then((r) => r.json())
       .then((j) => setEmployees(j.employees ?? []))
       .catch(() => {});
 
-    fetch(`/api/audit?companyId=${companyId}`)
+    fetch("/api/audit")
       .then((r) => r.json())
       .then((j) => setAuditLog(j.logs ?? []))
       .catch(() => {});

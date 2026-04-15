@@ -34,8 +34,7 @@ export default function OnboardingPage() {
     }
 
     const { company } = await res.json();
-    // Store just the ID for subsequent API calls
-    localStorage.setItem("locroll_company_id", company.id);
+    // Cookie is set server-side by /api/company — no localStorage needed
 
     router.push("/dashboard");
   }

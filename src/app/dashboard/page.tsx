@@ -24,19 +24,16 @@ export default function DashboardPage() {
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
 
   useEffect(() => {
-    const companyId = localStorage.getItem("locroll_company_id");
+    // Cookie is sent automatically — no companyId needed in URL
+    fetch("/api/employees")
+      .then((r) => r.json())
+      .then((j) => setTeamSize(j.employees?.length ?? 0))
+      .catch(() => {});
 
-    if (companyId) {
-      fetch(`/api/employees?companyId=${companyId}`)
-        .then((r) => r.json())
-        .then((j) => setTeamSize(j.employees?.length ?? 0))
-        .catch(() => {});
-
-      fetch(`/api/payroll/run?companyId=${companyId}`)
-        .then((r) => r.json())
-        .then((j) => setPayrollRuns(j.runs ?? []))
-        .catch(() => {});
-    }
+    fetch("/api/payroll/run")
+      .then((r) => r.json())
+      .then((j) => setPayrollRuns(j.runs ?? []))
+      .catch(() => {});
 
     // Fetch real balance from Locus
     fetch("/api/locus/balance")

@@ -69,9 +69,6 @@ export default function AddEmployeePage() {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
-    const companyId = localStorage.getItem("locroll_company_id");
-    if (!companyId) { setErrors({ email: "Company not found. Please complete onboarding." }); return; }
-
     const token = generateToken();
     const origin = typeof window !== "undefined" ? window.location.origin : "https://locroll.xyz";
     const inviteLink = `${origin}/invite/${token}`;
@@ -81,7 +78,6 @@ export default function AddEmployeePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
-        companyId,
         inviteToken: token,
         inviteLink,
       }),

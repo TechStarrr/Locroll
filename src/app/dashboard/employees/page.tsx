@@ -122,9 +122,7 @@ export default function EmployeesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const companyId = localStorage.getItem("locroll_company_id");
-    if (!companyId) return;
-    fetch(`/api/employees?companyId=${companyId}`)
+    fetch("/api/employees")
       .then((r) => r.json())
       .then((j) => setEmployees(j.employees ?? []))
       .catch(() => {});
@@ -147,8 +145,6 @@ export default function EmployeesPage() {
 
   async function handleImportConfirm() {
     if (!csvRows) return;
-    const companyId = localStorage.getItem("locroll_company_id");
-    if (!companyId) return;
     setImporting(true);
     const valid = csvRows.filter((r) => !r.error);
     const origin = window.location.origin;
@@ -156,7 +152,6 @@ export default function EmployeesPage() {
       const token = generateToken();
       return {
         ...r,
-        companyId,
         inviteToken: token,
         inviteLink: `${origin}/invite/${token}`,
       };
@@ -165,12 +160,12 @@ export default function EmployeesPage() {
     const res = await fetch("/api/employees/bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ companyId, employees: newEmployees }),
+      body: JSON.stringify({ employees: newEmployees }),
     });
 
     if (res.ok) {
       // Refresh employees list from DB
-      const updated = await fetch(`/api/employees?companyId=${companyId}`);
+      const updated = await fetch("/api/employees");
       const json = await updated.json();
       setEmployees(json.employees ?? []);
     }

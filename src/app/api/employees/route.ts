@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// GET /api/employees?companyId=...
+function getCompanyId(req: NextRequest): string | null {
+  return req.cookies.get("locroll_cid")?.value ?? null;
+}
+
+// GET /api/employees
 export async function GET(req: NextRequest) {
-  const companyId = req.nextUrl.searchParams.get("companyId");
-  if (!companyId) return NextResponse.json({ error: "companyId required" }, { status: 400 });
+  const companyId = getCompanyId(req);
+  if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const employees = await prisma.employee.findMany({
     where: { companyId },
@@ -15,13 +19,16 @@ export async function GET(req: NextRequest) {
 
 // POST /api/employees — create one employee
 export async function POST(req: NextRequest) {
+  const companyId = getCompanyId(req);
+  if (!companyId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+
   const body = await req.json();
   const {
-    companyId, firstName, lastName, email, countryCode, jobTitle,
+    firstName, lastName, email, countryCode, jobTitle,
     department, salaryAmount, currency, payFrequency, inviteToken, inviteLink,
   } = body;
 
-  if (!companyId || !firstName || !lastName || !email || !inviteToken || !inviteLink) {
+  if (!firstName || !lastName || !email || !inviteToken || !inviteLink) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
