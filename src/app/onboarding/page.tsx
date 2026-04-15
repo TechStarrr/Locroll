@@ -3,26 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
 
 const SIZES = ["1–10", "11–50", "51–200", "201–500", "500+"];
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { user } = usePrivy();
   const [companyName, setCompanyName] = useState("");
   const [companySize, setCompanySize] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!companyName.trim()) { setError("Company name is required"); return; }
+    if (!user?.id) { setError("Not authenticated"); return; }
     setLoading(true);
 
-    // Persist to localStorage
-    localStorage.setItem(
-      "locroll_company",
-      JSON.stringify({ name: companyName.trim(), size: companySize, createdAt: new Date().toISOString() })
-    );
+    const res = await fetch("/api/company", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: companyName.trim(), size: companySize, privyUserId: user.id }),
+    });
+
+    if (!res.ok) {
+      setError("Failed to create company. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    const { company } = await res.json();
+    // Store just the ID for subsequent API calls
+    localStorage.setItem("locroll_company_id", company.id);
 
     router.push("/dashboard");
   }

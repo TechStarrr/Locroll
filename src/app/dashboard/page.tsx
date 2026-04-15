@@ -8,11 +8,11 @@ import SectionHeader from "@/components/SectionHeader";
 
 interface PayrollRun {
   id: string;
-  date: string;
+  createdAt: string;
   lines: { name: string; email: string; amount: string; currency: string }[];
   total: string;
   currency: string;
-  status: "completed" | "pending";
+  status: "completed" | "pending" | "partial" | "failed";
 }
 
 export default function DashboardPage() {
@@ -24,11 +24,19 @@ export default function DashboardPage() {
   const [payrollRuns, setPayrollRuns] = useState<PayrollRun[]>([]);
 
   useEffect(() => {
-    // Load localStorage data
-    const employees = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
-    setTeamSize(employees.length);
-    const runs = JSON.parse(localStorage.getItem("locroll_payroll_runs") ?? "[]");
-    setPayrollRuns(runs);
+    const companyId = localStorage.getItem("locroll_company_id");
+
+    if (companyId) {
+      fetch(`/api/employees?companyId=${companyId}`)
+        .then((r) => r.json())
+        .then((j) => setTeamSize(j.employees?.length ?? 0))
+        .catch(() => {});
+
+      fetch(`/api/payroll/run?companyId=${companyId}`)
+        .then((r) => r.json())
+        .then((j) => setPayrollRuns(j.runs ?? []))
+        .catch(() => {});
+    }
 
     // Fetch real balance from Locus
     fetch("/api/locus/balance")
@@ -53,7 +61,7 @@ export default function DashboardPage() {
 
   const lastRun = payrollRuns[0];
   const lastRunLabel = lastRun
-    ? new Date(lastRun.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+    ? new Date(lastRun.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
     : "NO_RECENT_ACTIVITY";
 
   const balanceLabel = balanceError
@@ -161,7 +169,7 @@ export default function DashboardPage() {
                     {payrollRuns.slice(0, 10).map((run) => (
                       <tr key={run.id} className="border-t border-outline-variant/5">
                         <td className="px-6 py-4 text-on-surface">
-                          {new Date(run.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(run.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="px-6 py-4 text-on-surface-variant">{run.lines.length}</td>
                         <td className="px-6 py-4 text-[#13f09c] font-bold">{run.total} {run.currency}</td>

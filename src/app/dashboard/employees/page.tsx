@@ -122,8 +122,12 @@ export default function EmployeesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const stored: Employee[] = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
-    setEmployees(stored);
+    const companyId = localStorage.getItem("locroll_company_id");
+    if (!companyId) return;
+    fetch(`/api/employees?companyId=${companyId}`)
+      .then((r) => r.json())
+      .then((j) => setEmployees(j.employees ?? []))
+      .catch(() => {});
   }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -141,26 +145,36 @@ export default function EmployeesPage() {
     e.target.value = "";
   }
 
-  function handleImportConfirm() {
+  async function handleImportConfirm() {
     if (!csvRows) return;
+    const companyId = localStorage.getItem("locroll_company_id");
+    if (!companyId) return;
     setImporting(true);
     const valid = csvRows.filter((r) => !r.error);
     const origin = window.location.origin;
-    const newEmployees: Employee[] = valid.map((r) => {
+    const newEmployees = valid.map((r) => {
       const token = generateToken();
       return {
         ...r,
-        id: token,
+        companyId,
         inviteToken: token,
         inviteLink: `${origin}/invite/${token}`,
-        status: "pending",
-        createdAt: new Date().toISOString(),
       };
     });
-    const existing: Employee[] = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
-    const merged = [...existing, ...newEmployees];
-    localStorage.setItem("locroll_employees", JSON.stringify(merged));
-    setEmployees(merged);
+
+    const res = await fetch("/api/employees/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ companyId, employees: newEmployees }),
+    });
+
+    if (res.ok) {
+      // Refresh employees list from DB
+      const updated = await fetch(`/api/employees?companyId=${companyId}`);
+      const json = await updated.json();
+      setEmployees(json.employees ?? []);
+    }
+
     setCsvRows(null);
     setCsvFileName("");
     setImporting(false);

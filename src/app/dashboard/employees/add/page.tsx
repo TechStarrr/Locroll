@@ -64,31 +64,36 @@ export default function AddEmployeePage() {
     return e;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
+
+    const companyId = localStorage.getItem("locroll_company_id");
+    if (!companyId) { setErrors({ email: "Company not found. Please complete onboarding." }); return; }
 
     const token = generateToken();
     const origin = typeof window !== "undefined" ? window.location.origin : "https://locroll.xyz";
     const inviteLink = `${origin}/invite/${token}`;
 
-    const employee: CreatedEmployee = {
-      ...form,
-      id: token,
-      inviteToken: token,
-      inviteLink,
-      createdAt: new Date().toISOString(),
-    };
+    const res = await fetch("/api/employees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        companyId,
+        inviteToken: token,
+        inviteLink,
+      }),
+    });
 
-    // Persist to localStorage
-    const existing = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
-    localStorage.setItem("locroll_employees", JSON.stringify([...existing, employee]));
+    if (!res.ok) {
+      setErrors({ email: "Failed to save employee. Email may already exist." });
+      return;
+    }
 
-    // Simulate sending invite email (just log for now)
-    console.info(`[Locroll] Invite email sent to ${form.email} → ${inviteLink}`);
-
-    setCreated(employee);
+    const { employee } = await res.json();
+    setCreated({ ...employee, inviteToken: employee.inviteToken, inviteLink: employee.inviteLink });
   }
 
   function handleCopy() {

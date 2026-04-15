@@ -31,11 +31,11 @@ interface PayrollLine {
 
 interface PayrollRun {
   id: string;
-  date: string;
-  lines: { name: string; email: string; amount: string; currency: string; walletAddress: string }[];
+  createdAt: string;
+  lines: { name: string; email: string; amount: string; currency: string; walletAddress?: string | null }[];
   total: string;
   currency: string;
-  status: "completed" | "pending";
+  status: "completed" | "pending" | "partial" | "failed";
 }
 
 export default function PayrollPage() {
@@ -56,24 +56,28 @@ export default function PayrollPage() {
   const payrollReady = allEmployees.filter((e) => e.status === "active" && e.walletAddress);
 
   useEffect(() => {
-    const stored: Employee[] = JSON.parse(localStorage.getItem("locroll_employees") ?? "[]");
-    setAllEmployees(stored);
-    const storedRuns: PayrollRun[] = JSON.parse(localStorage.getItem("locroll_payroll_runs") ?? "[]");
-    setRuns(storedRuns);
+    const companyId = localStorage.getItem("locroll_company_id");
+    if (!companyId) return;
 
-    // Pre-fill lines from saved salary
-    const initial: Record<string, PayrollLine> = {};
-    stored.forEach((e) => {
-      if (e.status === "active" && e.walletAddress) {
-        initial[e.id] = {
-          employeeId: e.id,
-          amount: e.salaryAmount || "",
-          currency: e.currency || "USD",
-          override: false,
-        };
-      }
-    });
-    setLines(initial);
+    fetch(`/api/employees?companyId=${companyId}`)
+      .then((r) => r.json())
+      .then((j) => {
+        const emps: Employee[] = j.employees ?? [];
+        setAllEmployees(emps);
+        const initial: Record<string, PayrollLine> = {};
+        emps.forEach((e) => {
+          if (e.status === "active" && e.walletAddress) {
+            initial[e.id] = { employeeId: e.id, amount: e.salaryAmount || "", currency: e.currency || "USD", override: false };
+          }
+        });
+        setLines(initial);
+      })
+      .catch(() => {});
+
+    fetch(`/api/payroll/run?companyId=${companyId}`)
+      .then((r) => r.json())
+      .then((j) => setRuns(j.runs ?? []))
+      .catch(() => {});
   }, []);
 
   function updateLine(id: string, field: "amount" | "currency", value: string) {
@@ -91,7 +95,7 @@ export default function PayrollPage() {
 
   async function handleRunPayroll() {
     setRunning(true);
-    const runId = crypto.randomUUID();
+    const companyId = localStorage.getItem("locroll_company_id");
 
     const runLines = payrollReady.map((e) => ({
       employeeId: e.id,
@@ -102,52 +106,39 @@ export default function PayrollPage() {
       walletAddress: e.walletAddress,
     }));
 
-    const total = runLines.reduce((s, l) => s + l.amount, 0).toFixed(2);
-    const primaryCurrency = runLines[0]?.currency ?? "USD";
-
-    let runStatus: "completed" | "pending" = "pending";
+    let runResult: PayrollRun | null = null;
+    let apiSuccess = false;
 
     try {
       const res = await fetch("/api/payroll/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines: runLines, runId }),
+        body: JSON.stringify({ companyId, lines: runLines }),
       });
       const json = await res.json();
-      runStatus = json.success ? "completed" : "pending";
+      apiSuccess = json.success;
+      runResult = json.run ?? null;
     } catch {
-      // Network error — still record run locally
+      // Network error — UI will show error state
     }
 
-    const displayLines = runLines.map((l) => ({
-      name: l.name,
-      email: l.email,
-      amount: String(l.amount),
-      currency: l.currency,
-      walletAddress: l.walletAddress ?? l.email,
-    }));
-
-    const run: PayrollRun = {
-      id: runId,
-      date: new Date().toISOString(),
-      lines: displayLines,
-      total,
-      currency: primaryCurrency,
-      status: runStatus,
-    };
-
-    const existing: PayrollRun[] = JSON.parse(localStorage.getItem("locroll_payroll_runs") ?? "[]");
-    const updated = [run, ...existing];
-    localStorage.setItem("locroll_payroll_runs", JSON.stringify(updated));
-    setRuns(updated);
-
-    // Audit log
-    const auditLog: object[] = JSON.parse(localStorage.getItem("locroll_audit_log") ?? "[]");
-    auditLog.unshift({ type: "PAYROLL_RUN", runId: run.id, date: run.date, total: run.total, currency: run.currency, count: run.lines.length });
-    localStorage.setItem("locroll_audit_log", JSON.stringify(auditLog));
+    if (runResult) {
+      // Build a display-compatible run from the DB response
+      const displayRun: PayrollRun = {
+        ...runResult,
+        lines: runLines.map((l) => ({
+          name: l.name,
+          email: l.email,
+          amount: String(l.amount),
+          currency: l.currency,
+          walletAddress: l.walletAddress,
+        })),
+      };
+      setRuns((prev) => [displayRun, ...prev]);
+      setSuccess(displayRun);
+    }
 
     setRunning(false);
-    setSuccess(run);
   }
 
   return (
@@ -213,7 +204,7 @@ export default function PayrollPage() {
                 <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between text-sm py-2 border-t border-white/5 gap-1 sm:gap-0">
                   <div>
                     <span className="text-on-surface font-semibold">{l.name}</span>
-                    <span className="text-on-surface-variant ml-2 font-['IBM_Plex_Mono'] text-[10px] break-all sm:break-normal">{l.walletAddress.slice(0, 8)}…{l.walletAddress.slice(-4)}</span>
+                    <span className="text-on-surface-variant ml-2 font-['IBM_Plex_Mono'] text-[10px] break-all sm:break-normal">{l.walletAddress ? `${l.walletAddress.slice(0, 8)}…${l.walletAddress.slice(-4)}` : l.email}</span>
                   </div>
                   <span className="text-[#13f09c] font-bold font-['IBM_Plex_Mono'] shrink-0">{l.amount} {l.currency}</span>
                 </div>
@@ -338,7 +329,7 @@ export default function PayrollPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <div className="text-[10px] font-['IBM_Plex_Mono'] uppercase tracking-widest text-on-surface-variant mb-0.5">
-                        {new Date(run.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                        {new Date(run.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </div>
                       <div className="font-bold text-on-surface text-sm">{run.total} {run.currency}</div>
                     </div>

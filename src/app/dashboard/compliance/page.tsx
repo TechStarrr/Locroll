@@ -23,13 +23,14 @@ interface Employee {
 }
 
 interface AuditEvent {
+  id: string;
   type: string;
-  runId?: string;
-  date: string;
-  total?: string;
-  currency?: string;
-  count?: number;
-  [key: string]: unknown;
+  payrollRunId?: string | null;
+  companyId: string;
+  createdAt: string;
+  total?: string | null;
+  currency?: string | null;
+  count?: number | null;
 }
 
 function kycStatus(emp: Employee): "verified" | "pending" {
@@ -50,8 +51,19 @@ export default function CompliancePage() {
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
 
   const load = useCallback(() => {
-    setEmployees(JSON.parse(localStorage.getItem("locroll_employees") ?? "[]"));
-    setAuditLog(JSON.parse(localStorage.getItem("locroll_audit_log") ?? "[]"));
+    const companyId = localStorage.getItem("locroll_company_id");
+    if (!companyId) return;
+
+    fetch(`/api/employees?companyId=${companyId}`)
+      .then((r) => r.json())
+      .then((j) => setEmployees(j.employees ?? []))
+      .catch(() => {});
+
+    fetch(`/api/audit?companyId=${companyId}`)
+      .then((r) => r.json())
+      .then((j) => setAuditLog(j.logs ?? []))
+      .catch(() => {});
+
     setLastRefreshed(new Date());
   }, []);
 
@@ -264,7 +276,7 @@ export default function CompliancePage() {
                   <div className="flex-1 min-w-0">
                     <div className="text-xs text-on-surface">{formatEventLabel(event)}</div>
                     <div className="text-[10px] text-on-surface-variant mt-1 font-['IBM_Plex_Mono']">
-                      {formatDate(event.date)} · {new Date(event.date).toLocaleTimeString()}
+                      {formatDate(event.createdAt)} · {new Date(event.createdAt).toLocaleTimeString()}
                     </div>
                   </div>
                 </li>

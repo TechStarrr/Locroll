@@ -6,15 +6,32 @@ import { useEffect } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, user } = usePrivy();
   const router = useRouter();
 
   useEffect(() => {
-    if (ready && authenticated) {
-      const company = localStorage.getItem("locroll_company");
-      router.push(company ? "/dashboard" : "/onboarding");
+    if (!ready || !authenticated || !user) return;
+
+    async function checkCompany() {
+      // First check if we have a locally cached company ID
+      const cachedId = localStorage.getItem("locroll_company_id");
+      if (cachedId) { router.push("/dashboard"); return; }
+
+      // Otherwise look up by Privy user ID
+      const res = await fetch(`/api/company?privyUserId=${encodeURIComponent(user!.id)}`);
+      if (res.ok) {
+        const { company } = await res.json();
+        if (company) {
+          localStorage.setItem("locroll_company_id", company.id);
+          router.push("/dashboard");
+          return;
+        }
+      }
+      router.push("/onboarding");
     }
-  }, [ready, authenticated, router]);
+
+    checkCompany();
+  }, [ready, authenticated, user, router]);
 
   return (
     <div className="min-h-screen bg-[#070d1f] flex flex-col items-center justify-center px-6 relative overflow-hidden">

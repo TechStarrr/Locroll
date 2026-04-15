@@ -25,18 +25,19 @@ export default function InvitePage() {
   const [step, setStep] = useState<Step>("accept");
   const [loading, setLoading] = useState(true);
 
-  // Load employee from localStorage
+  // Load employee from API
   useEffect(() => {
-    const employees: Employee[] = JSON.parse(
-      localStorage.getItem("locroll_employees") ?? "[]"
-    );
-    const found = employees.find((e) => e.inviteToken === token);
-    if (found) {
-      setEmployee(found);
-    } else {
-      setStep("invalid");
-    }
-    setLoading(false);
+    fetch(`/api/employees/by-token/${token}`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.employee) {
+          setEmployee(j.employee);
+        } else {
+          setStep("invalid");
+        }
+      })
+      .catch(() => setStep("invalid"))
+      .finally(() => setLoading(false));
   }, [token]);
 
   // Once Privy authenticates after the employee clicked Accept, attach wallet to record
@@ -47,22 +48,21 @@ export default function InvitePage() {
       user.wallet?.address ??
       user.linkedAccounts.find((a) => a.type === "wallet")?.address;
 
-    const updated: Employee = {
-      ...employee,
-      privyUserId: user.id,
-      walletAddress: walletAddress ?? undefined,
-      status: "active",
-    };
-
-    // Patch the record in localStorage
-    const employees: Employee[] = JSON.parse(
-      localStorage.getItem("locroll_employees") ?? "[]"
-    );
-    const next = employees.map((e) => (e.inviteToken === token ? updated : e));
-    localStorage.setItem("locroll_employees", JSON.stringify(next));
-
-    setEmployee(updated);
-    setStep("accepted");
+    fetch(`/api/employees/${employee.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "active",
+        walletAddress: walletAddress ?? null,
+        privyUserId: user.id,
+      }),
+    })
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.employee) setEmployee(j.employee);
+        setStep("accepted");
+      })
+      .catch(() => setStep("accepted")); // still show success even if patch fails
   }, [step, ready, authenticated, user, employee, token]);
 
   function handleAccept() {

@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Company {
+  id           String       @id @default(cuid())
+  name         String
+  size         String?      // e.g. "1-10", "11-50"
+  privyUserId  String?      @unique // employer's Privy user ID
+  employees    Employee[]
+  payrollRuns  PayrollRun[]
+  createdAt    DateTime     @default(now())
+}
+
+model Employee {
+  id            String       @id @default(cuid())
+  companyId     String
+  company       Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  firstName     String
+  lastName      String
+  email         String
+  countryCode   String?      @default("")
+  jobTitle      String?      @default("")
+  department    String?      @default("")
+  salaryAmount  String?      @default("")
+  currency      String?      @default("USD")
+  payFrequency  String?      @default("monthly")
+  inviteToken   String       @unique
+  inviteLink    String
+  status        String       @default("pending") // "pending" | "active"
+  walletAddress String?
+  privyUserId   String?
+  paymentLines  PayrollLine[]
+  createdAt     DateTime     @default(now())
+
+  @@unique([companyId, email])
+}
+
+model PayrollRun {
+  id          String        @id @default(cuid())
+  companyId   String
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  total       String
+  currency    String
+  status      String        @default("completed") // "completed" | "pending"
+  lines       PayrollLine[]
+  auditLogs   AuditLog[]
+  createdAt   DateTime      @default(now())
+}
+
+model PayrollLine {
+  id           String     @id @default(cuid())
+  payrollRunId String
+  payrollRun   PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employeeId   String
+  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  amount       String
+  currency     String
+  walletAddress String?
+  createdAt    DateTime   @default(now())
+}
+
+model AuditLog {
+  id           String     @id @default(cuid())
+  payrollRunId String?
+  payrollRun   PayrollRun? @relation(fields: [payrollRunId], references: [id], onDelete: SetNull)
+  companyId    String
+  type         String     // "PAYROLL_RUN" | etc.
+  count        Int?
+  total        String?
+  currency     String?
+  createdAt    DateTime   @default(now())
+}
+
