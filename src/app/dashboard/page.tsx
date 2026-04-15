@@ -57,22 +57,27 @@ export default function DashboardPage() {
     : "NO_RECENT_ACTIVITY";
 
   const balanceLabel = balanceError
-    ? "UNAVAILABLE"
+    ? "—"
     : balance === null
     ? "…"
     : `$${parseFloat(balance).toFixed(2)}`;
+
+  const balanceStatus = balanceError
+    ? "CONNECT WALLET"
+    : balance === null
+    ? "SYNCING…"
+    : "ACCOUNT_SYNCED";
 
   return (
     <main className="relative min-h-screen">
       <header className="sticky top-0 z-40 bg-[#0c1324]/60 backdrop-blur-2xl flex justify-between items-center px-10 py-4 font-['Geist_Sans'] tracking-tight border-b border-white/5">
         <div className="flex items-center gap-8">
           <div>
-            <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest mb-1">
+            <div className="flex items-center text-[10px] text-on-surface-variant font-['IBM_Plex_Mono'] uppercase tracking-widest">
               <span>Locroll</span>
               <span className="mx-2 text-[#13f09c]/30">/</span>
               <span className="text-[#13f09c]">Dashboard</span>
             </div>
-            <h1 className="text-xl font-black uppercase tracking-tighter text-[#13f09c]">DASHBOARD_OVR</h1>
           </div>
           <div className="relative hidden lg:block">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -120,7 +125,7 @@ export default function DashboardPage() {
 
       <div className="px-10 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-          <StatCard title="Treasury Balance" value={balanceLabel} unit="USDC" icon="account_balance" status={balanceError ? "ERROR" : balance === null ? "SYNCING…" : "ACCOUNT_SYNCED"} />
+          <StatCard title="Treasury Balance" value={balanceLabel} unit="USDC" icon="account_balance" status={balanceStatus} />
           <StatCard title="Last Payroll Run" value={lastRunLabel} italic={!lastRun} icon="history" />
           <StatCard title="Team Size" value={String(teamSize)} unit="USERS" icon="groups" pending={teamSize === 0} />
           <StatCard title="Yield Earned" value="$0.00" icon="trending_up" yieldText="3.7% APY" />
